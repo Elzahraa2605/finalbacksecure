@@ -11,43 +11,27 @@ use Illuminate\Support\Facades\DB;
 
 class AlertController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
 {
-    $parent = auth('parent')->user();
+    // القراءة المباشرة من جدول child_alerts للأب رقم 1 
+    $parentId = 1; 
 
-    Alert::where('parent_id', $parent->id)
+    // حذف التنبيهات التي مر عليها أكثر من 7 أيام
+    Alert::where('parent_id', $parentId)
         ->where('created_at', '<', \Carbon\Carbon::now()->subDays(7))
         ->delete();
 
-    $query = Alert::where('parent_id', $parent->id);
-
-    if ($request->has('child_id') && $request->child_id) {
-        $query->where('child_id', $request->child_id);
-    }
-
-    if ($request->has('range')) {
-        if ($request->range === 'today') {
-            $query->whereDate('created_at', \Carbon\Carbon::today());
-        } elseif ($request->range === '7days') {
-            $query->where('created_at', '>=', \Carbon\Carbon::now()->subDays(7));
-        }
-    }
+    $query = Alert::where('parent_id', $parentId);
 
     $alerts = $query->orderBy('created_at', 'desc')->get();
 
     $formattedAlerts = $alerts->map(function ($alert) {
-
-    \Carbon\Carbon::setLocale('ar'); 
-        
+        \Carbon\Carbon::setLocale('en'); 
         $createdAt = \Carbon\Carbon::parse($alert->created_at);
 
         $alert->formatted_day  = $createdAt->isoFormat('dddd');          
         $alert->formatted_date = $createdAt->isoFormat('LL');            
         $alert->formatted_time = $createdAt->isoFormat('hh:mm A');       
-        
-
-        $alert->full_datetime  = $createdAt->isoFormat('dddd، LL') . ' الساعة ' . $createdAt->isoFormat('hh:mm A');
-
         return $alert;
     });
 
