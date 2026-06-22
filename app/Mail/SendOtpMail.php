@@ -12,7 +12,6 @@ class SendOtpMail extends Mailable
 
     public $otp;
 
-    // بنمرر كود الـ OTP هنا علشان نستخدمه جوه الإيميل
     public function __construct($otp)
     {
         $this->otp = $otp;
@@ -20,10 +19,10 @@ class SendOtpMail extends Mailable
 
     public function build()
     {
-        return $this->subject('رمز إعادة تعيين كلمة المرور - حماية الأطفال')
-                    ->html("<h3>مرحباً بك في نظام حماية الأطفال</h3>
-                            <p>لقد طلبت إعادة تعيين كلمة المرور الخاصة بك.</p>
-                            <p>رمز التحقق (OTP) الخاص بك هو: <b style='font-size: 20px; color: #4CAF50;'>{$this->otp}</b></p>
-                            <p>هذا الرمز صالح لمدة 15 دقيقة فقط.</p>");
+        return $this->subject('Password Reset OTP - Child Protection')
+                    ->html("<h3>Welcome to Child Protection System</h3>
+                            <p>You have requested to reset your password.</p>
+                            <p>Your One-Time Password (OTP) is: <b style='font-size: 20px; color: #4CAF50;'>{$this->otp}</b></p>
+                            <p>This code is valid for 15 minutes only.</p>");
     }
 }

@@ -2,13 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Controllers - بوابة الطفل
 use App\Http\Controllers\API\Child\Auth\AuthController as ChildAuthController;
 use App\Http\Controllers\API\Child\AppUsageController;
 use App\Http\Controllers\API\Child\LocationController;
 use App\Http\Controllers\API\Child\ChildAppRequestController;
 
-// Controllers - بوابة الأب
 use App\Http\Controllers\API\Parent\Auth\AuthController as ParentAuthController;
 use App\Http\Controllers\API\Parent\ChildController; 
 use App\Http\Controllers\API\Parent\ChildManagementController;
@@ -17,25 +15,14 @@ use App\Http\Controllers\API\Parent\DowntimeController;
 use App\Http\Controllers\API\Parent\ParentLocationController;
 use App\Http\Controllers\Api\ChildAppController;
 
-// Controllers المضافة
 use App\Http\Controllers\API\AlertController;
 use App\Http\Controllers\Api\BabyMonitorController; 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
-/*
-|--------------------------------------------------------------------------
-| Global Catch-All
-|--------------------------------------------------------------------------
-*/
 Route::any('{any}', function() {
     return response()->json(['status' => 'success', 'message' => 'Rules feature completely removed.'], 200);
 })->where('any', '.*rules.*');
 
-/*
-|--------------------------------------------------------------------------
-| Hardware & Internal Routes
-|--------------------------------------------------------------------------
-*/
 Route::prefix('hardware')->group(function () {
     Route::post('/heartbeat', [BabyMonitorController::class, 'heartbeat']);
     Route::post('/crying-status', [BabyMonitorController::class, 'receiveCryAlert']);
@@ -45,23 +32,12 @@ Route::prefix('hardware')->group(function () {
 
 Route::post('/internal/log-alert', [AlertController::class, 'store']);
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes & Forget Password (المسارات العامة المشتركة)
-|--------------------------------------------------------------------------
-*/
 Route::get('/parent/alerts', [AlertController::class, 'index']);
 
-// 🚀 تم نقلهم هنا (خارج أي بريفكس) ليعملوا بشكل مباشر للجميع مجاناً وبدون توكن
 Route::post('/password/forgot', [ForgotPasswordController::class, 'sendOtp']);
 Route::post('/password/verify-otp', [ForgotPasswordController::class, 'verifyOtp']);
 Route::post('/password/reset', [ForgotPasswordController::class, 'resetPassword']);
 
-/*
-|--------------------------------------------------------------------------
-| Protected Parent Routes (بوابة الأب المحمية)
-|--------------------------------------------------------------------------
-*/
 Route::prefix('parent')->group(function () {
     Route::post('/register', [ParentAuthController::class, 'register']);
     Route::post('/login', [ParentAuthController::class, 'login']);
@@ -127,11 +103,6 @@ Route::prefix('parent')->group(function () {
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Child Routes (بوابة الطفل)
-|--------------------------------------------------------------------------
-*/
 Route::prefix('child')->group(function () {
     Route::post('login', [ChildAuthController::class, 'login']);
     Route::post('verify-pairing', [ChildController::class, 'verifyPairing']);
