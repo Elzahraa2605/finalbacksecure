@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ChildAppController;
 // Controllers المضافة
 use App\Http\Controllers\API\AlertController;
 use App\Http\Controllers\Api\BabyMonitorController; 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,15 +45,17 @@ Route::prefix('hardware')->group(function () {
 
 Route::post('/internal/log-alert', [AlertController::class, 'store']);
 
-
 /*
 |--------------------------------------------------------------------------
-| Public Parent Routes (تم إخراج جلب التنبيهات هنا للربط المباشر مع الداتابيز)
+| Public Routes & Forget Password (المسارات العامة المشتركة)
 |--------------------------------------------------------------------------
 */
-// الروت السحري العام لجلب التنبيهات فوراً للموبايل بدون مشاكل الـ Token
 Route::get('/parent/alerts', [AlertController::class, 'index']);
 
+// 🚀 تم نقلهم هنا (خارج أي بريفكس) ليعملوا بشكل مباشر للجميع مجاناً وبدون توكن
+Route::post('/password/forgot', [ForgotPasswordController::class, 'sendOtp']);
+Route::post('/password/verify-otp', [ForgotPasswordController::class, 'verifyOtp']);
+Route::post('/password/reset', [ForgotPasswordController::class, 'resetPassword']);
 
 /*
 |--------------------------------------------------------------------------
@@ -66,7 +69,6 @@ Route::prefix('parent')->group(function () {
     Route::middleware(['auth:parent'])->group(function () {
         
         Route::prefix('alerts')->group(function () {
-            // ملاحظة: تم حذف Route::get('/', ...) من هنا ونقله للأعلى ليكون عاماً
             Route::post('/mark-all-read', [AlertController::class, 'markAllReadForChild']);
             Route::post('/{uuid}/read', [AlertController::class, 'markRead']);
             Route::delete('/{uuid}', [AlertController::class, 'destroy']);
@@ -134,7 +136,6 @@ Route::prefix('child')->group(function () {
     Route::post('login', [ChildAuthController::class, 'login']);
     Route::post('verify-pairing', [ChildController::class, 'verifyPairing']);
 
-    // إعدادات التطبيقات للطفل
     Route::get('config', [ChildAppController::class, 'getAppConfig']);
     Route::post('sync-all-apps', [ChildAppController::class, 'syncAllApps']);
     Route::post('apps/sync-new', [ChildAppController::class, 'syncAllApps']);
