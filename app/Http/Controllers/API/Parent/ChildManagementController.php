@@ -185,23 +185,33 @@ class ChildManagementController extends Controller
     /**
      * 🔥 تحديث حالة الطلب بشكل آمن ومحمي 100% مع معالجة فك الحظر اللحظي
      */
+    /**
+     * 🔥 تحديث حالة الطلب بشكل آمن ومحمي 100% مع معالجة فك الحظر اللحظي
+     */
     public function updateRequestStatus(Request $request)
     {
+        // 🌟 جعل الـ Validation مرن يقبل إما request_id أو id
         $validated = $request->validate([
-            'request_id' => 'required|integer',
+            'request_id' => 'required_without:id|integer',
+            'id'         => 'required_without:request_id|integer',
             'status'     => 'required|string|in:approved,rejected',
         ]);
 
-        // 🌟 حل ثغرة الأمن: جلب طلب التطبيق مع التأكد التام أنه يخص أطفال هذا الأب فقط لمنع التلاعب بالـ IDs
+        // لقط الـ ID الحقيقي أياً كان الاسم المبعوث به من الفرونت إيند
+        $requestId = $request->input('request_id') ?? $request->input('id');
+
+        // 🌟 جلب طلب التطبيق مع التأكد التام أنه يخص أطفال هذا الأب فقط لمنع التلاعب
         $childIds = $request->user()->children()->pluck('id')->toArray();
 
         $appRequest = \App\Models\App_request::whereIn('child_id', $childIds)
-            ->findOrFail($validated['request_id']);
+            ->findOrFail($requestId); // 👈 استخدام المتغير المرن هنا
         
         // 2. تحديث الحقل الرئيسي للطلب بنجاح
         $appRequest->update([
             'status' => $validated['status']
         ]);
+
+        // ... سيبي باقي كود الدالة تحت زي ما هو بالظبط بدون أي تغيير ...
 
         // 3. إذا قام الأب بالموافقة (Approved)، يتم فك الحظر الفوري وتطهير الكاش
         if ($validated['status'] === 'approved') {
